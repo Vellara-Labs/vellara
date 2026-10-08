@@ -24,3 +24,6 @@ jobs:
 
       - name: Build SDK
         run: npm run build:sdk
+
+      - name: Test SDK encoding and decoding
+        run: npm run test:sdk
