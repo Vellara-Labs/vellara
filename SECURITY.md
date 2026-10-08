@@ -17,3 +17,12 @@ This policy covers the TrustMint contracts, SDK, deployment tooling, and fronten
 ## Supported code
 
 Security fixes are made against the latest code on `main`. Older tags, forks, and deployed contracts do not update automatically. Contract operators are responsible for assessing and applying upgrades or redeployments.
+
+### Supported versions
+
+| Version | Release date | Supported | Scope |
+|---|---|---|---|
+| 0.1.0 | 2026-06-26 | ✅ Yes | contracts/, sdk/, frontend/ |
+| < 0.1.0 | - | ❌ No | - |
+
+Only the latest minor version receives security patches. Earlier versions are end-of-life and should not be used for production deployments.
