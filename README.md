@@ -1,14 +1,14 @@
-<div align="center">
-  <img src="assets/logo.svg" alt="Vellara — Real assets on Stellar" width="340" />
+﻿<div align="center">
+  <img src="assets/logo.svg" alt="Vellara 鈥?Real assets on Stellar" width="340" />
 
   <h1>Real assets. Clear rules. Stellar Soroban.</h1>
 
-  <p>Open-source building blocks for tokenized invoices, property shares, and carbon credits—with eligibility and transfer rules checked by smart contracts.</p>
+  <p>Open-source building blocks for tokenized invoices, property shares, and carbon credits鈥攚ith eligibility and transfer rules checked by smart contracts.</p>
 
   <p>
     <a href="https://vellara-x.vercel.app"><strong>Open the live preview</strong></a>
-    · <a href="#get-started">Get started</a>
-    · <a href="https://github.com/Vellara-Labs/Vellara/issues">Report an issue</a>
+    路 <a href="#get-started">Get started</a>
+    路 <a href="https://github.com/Vellara-Labs/Vellara/issues">Report an issue</a>
   </p>
 
   <p>
@@ -70,7 +70,7 @@ Asset contracts invoke the registry and compliance engine during relevant operat
 
 ### Requirements
 
-- Rust toolchain and the `wasm32-unknown-unknown` target
+- Rust toolchain and the `wasm32v1-none` target
 - Stellar CLI
 - Node.js 20 or newer
 - Docker, if you want to run the local integration suite
@@ -80,8 +80,8 @@ Asset contracts invoke the registry and compliance engine during relevant operat
 From the repository root:
 
 ```bash
-rustup target add wasm32-unknown-unknown
-cargo build --release --target wasm32-unknown-unknown
+rustup target add wasm32v1-none
+cargo build --release --target wasm32v1-none
 cargo test --features testutils
 ```
 
@@ -167,11 +167,11 @@ Copy `.env.example` to `.env` and fill in your values (see the file for inline d
 
 ## Security
 
-- **Never commit secrets** — keep keys, seed phrases, and `.env` files out of source control.
+- **Never commit secrets** 鈥?keep keys, seed phrases, and `.env` files out of source control.
 - **Testnet values have no real-world value**; treat testnet deployments as experimental.
-- **Keys never leave the wallet** — signing is delegated to the user's Stellar wallet; the app does not store secret keys.
+- **Keys never leave the wallet** 鈥?signing is delegated to the user's Stellar wallet; the app does not store secret keys.
 - Report vulnerabilities per `SECURITY.md` where present rather than opening a public issue.
 
 ## License
 
-MIT — see [`LICENSE`](LICENSE).
+MIT 鈥?see [`LICENSE`](LICENSE).

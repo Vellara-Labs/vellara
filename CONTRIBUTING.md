@@ -1,4 +1,4 @@
-# Contributing to TrustMint
+﻿# Contributing to TrustMint
 
 Thanks for taking the time to improve TrustMint. The project is an early-stage Soroban starter kit, and contributions that make its contracts safer, examples clearer, or developer experience easier are welcome.
 
@@ -10,12 +10,12 @@ Thanks for taking the time to improve TrustMint. The project is an early-stage S
 
 ## Set up a local checkout
 
-Requirements: Rust, the `wasm32-unknown-unknown` target, Stellar CLI, Node.js 20 or newer, and Docker for local integration tests.
+Requirements: Rust, the `wasm32v1-none` target, Stellar CLI, Node.js 20 or newer, and Docker for local integration tests.
 
 ```bash
 git clone https://github.com/zeemscript/TrustMint.git
 cd TrustMint
-rustup target add wasm32-unknown-unknown
+rustup target add wasm32v1-none
 ```
 
 For contract changes, run the relevant checks from the repository root:
