@@ -34,7 +34,7 @@ export default function Layout({ children }: { children: ReactNode }) {
       <header style={styles.header}>
         <div className="container" style={styles.headerInner}>
           <Link to="/" style={styles.brand} onClick={closeMenu}>
-            <img src="/trustmint.svg" alt="TrustMint" width={148} height={36} style={{ display: "block" }} />
+            <img src="/vellara.svg" alt="TrustMint" width={148} height={36} style={{ display: "block" }} />
             <span className="badge badge-accent" style={{ marginLeft: "0.4rem" }}>
               {network === "mainnet" ? "Mainnet" : "Testnet"}
             </span>
