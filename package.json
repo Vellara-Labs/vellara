@@ -5,6 +5,7 @@
     "sdk"
   ],
   "scripts": {
-    "build:sdk": "npm --workspace sdk run build"
+    "build:sdk": "npm --workspace sdk run build",
+    "test:sdk": "npm --workspace sdk test"
   }
 }
