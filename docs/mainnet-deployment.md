@@ -4,18 +4,42 @@ TrustMint currently provides a testnet deployment workflow and a mainnet readine
 
 ## Current deployment scope
 
-[`scripts/deploy.sh`](../scripts/deploy.sh) accepts a network through `STELLAR_NETWORK` and deploys five contracts: the KYC registry, compliance engine, invoice token, property token, and carbon-credit token. It writes those contract IDs to `frontend/.env`. It does not deploy the separate `rwa-token` reference contract.
+[scripts/deploy.sh](../scripts/deploy.sh) accepts a network through STELLAR_NETWORK and deploys five contracts: the KYC registry, compliance engine, invoice token, property token, and carbon-credit token. It writes those contract IDs to rontend/.env. It does not deploy the separate 
+wa-token reference contract.
 
-The asset metadata values are currently embedded as placeholders in the deployment script. Review and replace them before any deployment. The script overwrites `frontend/.env`; back up any configuration you need first. The deployment verification helper should also be reviewed against the current contract interfaces before relying on it.
+The asset metadata values are currently embedded as placeholders in the deployment script. Review and replace them before any deployment. The script overwrites rontend/.env; back up any configuration you need first.
 
 For development, deploy to testnet first:
 
-```bash
+`ash
 bash scripts/setup-identity.sh trustmint-dev
 bash scripts/deploy.sh trustmint-dev
-```
+`
 
 Do not change the network to mainnet as a shortcut to production. A testnet deployment is a development check, not evidence that a production deployment is safe.
+
+## Deployment verification
+
+Once contracts are deployed, verify the live deployment by running [scripts/verify-deployment.sh](../scripts/verify-deployment.sh):
+
+`ash
+bash scripts/verify-deployment.sh [identity-name]
+`
+
+The script inspects configuration variables loaded from rontend/.env:
+- VITE_STELLAR_NETWORK (defaults to 	estnet if unset)
+- VITE_KYC_REGISTRY_ID (required)
+- VITE_COMPLIANCE_ENGINE_ID (required)
+- VITE_INVOICE_TOKEN_ID (required)
+- VITE_PROPERTY_TOKEN_ID (required)
+- VITE_CARBON_TOKEN_ID (required)
+- VITE_RWA_TOKEN_ID (optional reference contract)
+
+These environment keys match rontend/.env.example.
+
+> **Important Note on RWA Token Verification:**  
+> Because scripts/deploy.sh does not deploy the separate 
+wa-token reference contract, scripts/verify-deployment.sh requires VITE_RWA_TOKEN_ID to be explicitly set in order to verify it. If VITE_RWA_TOKEN_ID is unset, the verification run automatically degrades to checking only the five core deployed contracts. To fully verify all six contracts including RWA, ensure VITE_RWA_TOKEN_ID is populated with a valid deployed contract ID before executing the verification script.
 
 ## Readiness checklist
 
@@ -37,6 +61,6 @@ The admin and verifier roles can affect minting, eligibility records, policy set
 
 ## After an approved deployment
 
-Record the source commit, optimized WASM hashes, network, contract IDs, constructor values, and authorized operators. Verify the deployed state through read-only contract calls and independently confirm the results before enabling user workflows. Store production contract IDs in the appropriate deployment environment; never commit secret material or private identity data.
+Record the source commit, optimized WASM hashes, network, contract IDs (recording all six IDs alongside the release notes), constructor values, and authorized operators. Verify the deployed state using scripts/verify-deployment.sh through read-only contract calls and independently confirm the results before enabling user workflows. Store production contract IDs in the appropriate deployment environment; never commit secret material or private identity data.
 
 Consult the [Stellar developer documentation](https://developers.stellar.org/docs) for current network and Soroban operational guidance. Network endpoints and CLI behavior can change; use current official guidance when preparing an actual deployment.
