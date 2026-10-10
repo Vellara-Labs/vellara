@@ -6,7 +6,7 @@ export interface KycRecord {
   status: KycStatus;
   verifier: string;
   tier: number;
-  expiry: number;
+  expiry: bigint;
   jurisdiction: string;
 }
 
@@ -16,9 +16,11 @@ export interface InvoiceMeta {
   debtor: string;
   face_value_usd: bigint;
   discount_rate_bps: number;
-  due_date: number;
+  due_date: bigint;
   currency: string;
   ipfs_doc_hash: string;
+  transfer_fee_bps?: number;
+  fee_recipient?: string | null;
 }
 
 export interface PropertyMeta {
@@ -47,7 +49,7 @@ export interface ProjectMeta {
 export interface RetirementReceipt {
   retiree: string;
   amount: bigint;
-  timestamp: number;
+  timestamp: bigint;
   beneficiary: string;
   retirement_reason: string;
 }
@@ -61,17 +63,10 @@ export interface ContractEvent {
 
 export interface ComplianceRules {
   max_transfer_amount: bigint;
-  min_holding_period: number;
+  min_holding_period: bigint;
   max_holders: number;
   require_same_jurisdiction: boolean;
   paused: boolean;
-}
-
-export interface ContractEvent {
-  type: string;
-  amount: string;
-  counterparty: string;
-  timestamp: string;
 }
 
 export interface WalletState {
