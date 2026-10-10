@@ -13,25 +13,41 @@ export class InvoiceTokenClient extends BaseContractClient {
     return scVal<InvoiceMeta>(await this.simulate("get_meta", []));
   }
 
-  async balance(addr: string): Promise<bigint> {
+  async balance(addr: string, invoice_id: string): Promise<bigint> {
     return scVal<bigint>(
-      await this.simulate("balance", [new Address(addr).toScVal()]),
+      await this.simulate("balance", [
+        new Address(addr).toScVal(),
+        nativeToScVal(invoice_id, { type: "string" }),
+      ]),
     );
   }
 
-  async totalSupply(): Promise<bigint> {
-    return scVal<bigint>(await this.simulate("total_supply", []));
+  async totalSupply(invoice_id: string): Promise<bigint> {
+    return scVal<bigint>(
+      await this.simulate("total_supply", [
+        nativeToScVal(invoice_id, { type: "string" }),
+      ]),
+    );
   }
 
-  async isSettled(): Promise<boolean> {
-    return scVal<boolean>(await this.simulate("is_settled", []));
+  async isSettled(invoice_id: string): Promise<boolean> {
+    return scVal<boolean>(
+      await this.simulate("is_settled", [
+        nativeToScVal(invoice_id, { type: "string" }),
+      ]),
+    );
   }
 
-  async allowance(from: string, spender: string): Promise<bigint> {
+  async allowance(
+    from: string,
+    spender: string,
+    invoice_id: string,
+  ): Promise<bigint> {
     return scVal<bigint>(
       await this.simulate("allowance", [
         new Address(from).toScVal(),
         new Address(spender).toScVal(),
+        nativeToScVal(invoice_id, { type: "string" }),
       ]),
     );
   }
@@ -50,26 +66,44 @@ export class InvoiceTokenClient extends BaseContractClient {
 
   // ── Transaction builders (return operation XDR for signing) ───────────────
 
-  buildIssueXdr(to: string, amount: bigint): string {
+  buildIssueXdr(
+    invoice_id: string,
+    to: string,
+    amount: bigint,
+  ): string {
     return this.buildCallXdr("issue", [
+      nativeToScVal(invoice_id, { type: "string" }),
       new Address(to).toScVal(),
       nativeToScVal(amount, { type: "i128" }),
     ]);
   }
 
-  buildSettleXdr(): string {
-    return this.buildCallXdr("settle", []);
+  buildSettleXdr(invoice_id: string): string {
+    return this.buildCallXdr("settle", [
+      nativeToScVal(invoice_id, { type: "string" }),
+    ]);
   }
 
-  buildRedeemXdr(from: string, amount: bigint): string {
+  buildRedeemXdr(
+    invoice_id: string,
+    from: string,
+    amount: bigint,
+  ): string {
     return this.buildCallXdr("redeem", [
+      nativeToScVal(invoice_id, { type: "string" }),
       new Address(from).toScVal(),
       nativeToScVal(amount, { type: "i128" }),
     ]);
   }
 
-  buildTransferXdr(from: string, to: string, amount: bigint): string {
+  buildTransferXdr(
+    invoice_id: string,
+    from: string,
+    to: string,
+    amount: bigint,
+  ): string {
     return this.buildCallXdr("transfer", [
+      nativeToScVal(invoice_id, { type: "string" }),
       new Address(from).toScVal(),
       new Address(to).toScVal(),
       nativeToScVal(amount, { type: "i128" }),
@@ -77,12 +111,14 @@ export class InvoiceTokenClient extends BaseContractClient {
   }
 
   buildTransferFromXdr(
+    invoice_id: string,
     spender: string,
     from: string,
     to: string,
     amount: bigint,
   ): string {
     return this.buildCallXdr("transfer_from", [
+      nativeToScVal(invoice_id, { type: "string" }),
       new Address(spender).toScVal(),
       new Address(from).toScVal(),
       new Address(to).toScVal(),
@@ -93,12 +129,14 @@ export class InvoiceTokenClient extends BaseContractClient {
   buildApproveXdr(
     from: string,
     spender: string,
+    invoice_id: string,
     amount: bigint,
     expirationLedger: number,
   ): string {
     return this.buildCallXdr("approve", [
       new Address(from).toScVal(),
       new Address(spender).toScVal(),
+      nativeToScVal(invoice_id, { type: "string" }),
       nativeToScVal(amount, { type: "i128" }),
       nativeToScVal(expirationLedger, { type: "u32" }),
     ]);

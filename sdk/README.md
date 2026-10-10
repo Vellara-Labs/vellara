@@ -34,7 +34,9 @@ const invoice = new InvoiceTokenClient(
   NETWORK_PASSPHRASES[network],
 );
 
-const supply = await invoice.totalSupply();
+const invoiceId = "INV-0001"; // multi-invoice interface: every invoice method takes an invoice_id
+
+const supply = await invoice.totalSupply(invoiceId);
 console.log(supply);
 ```
 
@@ -46,7 +48,7 @@ Use contract IDs deployed to the same network as the RPC server. Do not place pr
 | --- | --- |
 | `KycRegistryClient` | Read holder approval and KYC records; build verifier operations. |
 | `ComplianceEngineClient` | Read transfer policy and build admin policy operations. |
-| `InvoiceTokenClient` | Read token and invoice state; build issue, settle, redeem, transfer, and approval operations. |
+| `InvoiceTokenClient` | Multi-invoice interface: every invoice operation takes an `invoice_id`. Read token and invoice state; build issue, settle, redeem, transfer, and approval operations. |
 | `PropertyTokenClient` | Read property metadata and share state; build property operations. |
 | `CarbonTokenClient` | Read project and credit state; build issue, retire, and transfer operations. |
 | `RwaTokenClient` | Read reference token metadata and balances; build token operations. |
