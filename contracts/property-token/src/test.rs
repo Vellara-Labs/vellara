@@ -556,6 +556,95 @@ fn test_buyback_successful() {
 }
 
 #[test]
+fn test_buyback_then_deposit_dividend_two_holders() {
+    let h = setup();
+    let alice = Address::generate(&h.env);
+    let bob = Address::generate(&h.env);
+    h.approve_kyc(&alice);
+    h.approve_kyc(&bob);
+
+    // Initial state: total authorized shares = 1_000.
+    // Mint 600 shares to Alice, 400 shares to Bob.
+    h.token.mint(&alice, &600);
+    h.token.mint(&bob, &400);
+    assert_eq!(h.token.balance(&alice), 600);
+    assert_eq!(h.token.balance(&bob), 400);
+    assert_eq!(h.token.total_shares(), 1_000);
+
+    // Round 1 dividend before buyback:
+    // Deposit: 1_000 stroops over total 1_000 shares => dps = 1_000 / 1_000 = 1 stroop/share.
+    // Expected Alice pending: 600 shares * 1 dps = 600.
+    // Expected Bob pending:   400 shares * 1 dps = 400.
+    h.token.deposit_dividend(&1_000);
+    assert_eq!(h.token.pending_dividend(&alice), 600);
+    assert_eq!(h.token.pending_dividend(&bob), 400);
+
+    // Admin executes buyback of 200 shares from Alice:
+    // - Alice balance reduces: 600 - 200 = 400 shares.
+    // - TotalShares decreases: 1_000 - 200 = 800 shares.
+    // - Alice accrued dividend (600) is saved to unclaimed, debt reset to 400 * 1 = 400.
+    h.token.buyback(&alice, &200);
+
+    // Assert total_shares after the buyback:
+    assert_eq!(h.token.total_shares(), 800);
+    assert_eq!(h.token.balance(&alice), 400);
+    assert_eq!(h.token.balance(&bob), 400);
+
+    // Round 2 dividend after buyback:
+    // Deposit: 1_600 stroops over current TotalShares (800) => +2 stroops/share.
+    // New total dps = 1 + (1_600 / 800) = 3 stroops/share.
+    //
+    // Arithmetic for pending dividends:
+    // - Alice:
+    //     unclaimed = 600 (from round 1)
+    //     accrued   = balance * dps - debt = 400 * 3 - 400 = 1_200 - 400 = 800
+    //     pending   = 600 + 800 = 1_400 stroops.
+    // - Bob:
+    //     unclaimed = 0
+    //     accrued   = balance * dps - debt = 400 * 3 - 0 = 1_200 stroops.
+    //     pending   = 1_200 stroops.
+    h.token.deposit_dividend(&1_600);
+
+    assert_eq!(h.token.pending_dividend(&alice), 1_400);
+    assert_eq!(h.token.pending_dividend(&bob), 1_200);
+
+    // Verify claiming both dividends matches hard-coded integer expectations
+    let alice_claimed = h.token.claim_dividend(&alice);
+    let bob_claimed = h.token.claim_dividend(&bob);
+    assert_eq!(alice_claimed, 1_400);
+    assert_eq!(bob_claimed, 1_200);
+}
+
+#[test]
+fn test_buyback_then_deposit_dividend_ordering_repricing() {
+    let h = setup();
+    let alice = Address::generate(&h.env);
+    let bob = Address::generate(&h.env);
+    h.approve_kyc(&alice);
+    h.approve_kyc(&bob);
+
+    // Mint 500 shares to Alice and 500 shares to Bob (total 1_000 shares)
+    h.token.mint(&alice, &500);
+    h.token.mint(&bob, &500);
+    assert_eq!(h.token.total_shares(), 1_000);
+
+    // Admin buys back 500 shares from Alice (Alice drops to 0 shares)
+    h.token.buyback(&alice, &500);
+    assert_eq!(h.token.total_shares(), 500);
+    assert_eq!(h.token.balance(&alice), 0);
+    assert_eq!(h.token.balance(&bob), 500);
+
+    // Deposit dividend after buyback:
+    // 1_500 stroops over 500 TotalShares => dps = 1_500 / 500 = 3 stroops/share.
+    // Alice (0 shares) gets 0.
+    // Bob (500 shares) gets 500 * 3 = 1_500 stroops.
+    h.token.deposit_dividend(&1_500);
+    assert_eq!(h.token.pending_dividend(&alice), 0);
+    assert_eq!(h.token.pending_dividend(&bob), 1_500);
+    assert_eq!(h.token.claim_dividend(&bob), 1_500);
+}
+
+#[test]
 fn test_buyback_insufficient_shares() {
     let h = setup();
     let alice = Address::generate(&h.env);
