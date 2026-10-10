@@ -123,7 +123,7 @@ npm run lint
 npm run build
 ```
 
-The GitHub Actions workflows run formatting, lint, contract tests, WASM builds, and a local Stellar integration job. Passing CI is useful feedback; it is not a security audit or production-readiness guarantee.
+The GitHub Actions workflows run Rustfmt, Clippy, contract unit tests, WASM builds, and a local Stellar integration job. Frontend lint and build are local pre-PR steps. Passing CI is useful feedback; it is not a security audit or production-readiness guarantee.
 
 ## Repository map
 
