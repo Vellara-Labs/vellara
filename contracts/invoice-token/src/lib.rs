@@ -366,13 +366,13 @@ impl InvoiceToken {
             .get(&DataKey::SettlementAmount(invoice_id.clone()))
             .unwrap_or(0);
         if settlement > 0 {
-            let meta: InvoiceMeta = env
+            let total_supply: i128 = env
                 .storage()
                 .persistent()
-                .get(&DataKey::InvoiceMeta(invoice_id.clone()))
-                .expect("invoice metadata must exist");
-            if meta.face_value_usd > 0 {
-                let max_redeemable = bal * settlement / meta.face_value_usd;
+                .get(&DataKey::TotalSupply(invoice_id.clone()))
+                .unwrap_or(0);
+            if total_supply > 0 {
+                let max_redeemable = bal * settlement / total_supply;
                 if amount > max_redeemable {
                     panic!("exceeds proportional settlement");
                 }

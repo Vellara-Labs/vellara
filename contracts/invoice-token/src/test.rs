@@ -520,8 +520,8 @@ fn test_partial_settle_proportional_redemption() {
     assert_eq!(h.token.settlement_amount(&invoice_id), settlement);
     assert!(h.token.is_settled(&invoice_id));
 
-    // Holder can redeem up to issued * settlement / face = 60 tokens
-    let max_redeemable = issued * settlement / face;
+    // Holder can redeem up to issued * settlement / total_supply
+    let max_redeemable = issued * settlement / issued;
     h.token.redeem(&invoice_id, &holder, &max_redeemable);
 }
 
@@ -533,11 +533,38 @@ fn test_partial_settle_blocks_over_proportional_redeem() {
 
     let face = 1_000_000_000_000i128;
     let invoice_id = inv_id(&h.env);
-    h.token.issue(&invoice_id, &holder, &100);
+    let issued = 100i128;
+    h.token.issue(&invoice_id, &holder, &issued);
     h.token.partial_settle(&invoice_id, &(face * 50 / 100));
 
+    // Proportional share is bal * settlement / total_supply: 100 * (500_000_000_000) / 100
     // Trying to redeem more than 50 (the proportional share) should fail
     assert!(h.token.try_redeem(&invoice_id, &holder, &51).is_err());
+}
+
+#[test]
+fn test_partial_settle_proportional_redemption_supply_differs_from_face_value() {
+    let h = setup();
+    let holder = Address::generate(&h.env);
+    h.approve_kyc(&holder);
+
+    // Mints a supply (250 tokens) that is not equal to the face value (1_000_000_000_000 stroops)
+    let face = 1_000_000_000_000i128;
+    let issued = 250i128;
+    let invoice_id = inv_id(&h.env);
+    h.token.issue(&invoice_id, &holder, &issued);
+
+    // Partial settle for 40% of face value
+    let settlement = face * 40 / 100;
+    h.token.partial_settle(&invoice_id, &settlement);
+
+    assert_eq!(h.token.settlement_amount(&invoice_id), settlement);
+    assert_eq!(h.token.total_supply(&invoice_id), issued);
+
+    // Proportional share uses total_supply, not face_value_usd:
+    // bal * settlement / total_supply = 250 * (400_000_000_000) / 250
+    let max_redeemable = issued * settlement / issued;
+    h.token.redeem(&invoice_id, &holder, &max_redeemable);
 }
 
 #[test]
