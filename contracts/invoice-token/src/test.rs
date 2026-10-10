@@ -120,6 +120,81 @@ fn test_issue_idempotency_holder_count() {
 }
 
 #[test]
+fn test_transfer_full_balance_holder_count() {
+    // Current behaviour: invoice-token calls register_holder on recipients,
+    // but does not call unregister_holder when a sender's balance drops to zero.
+    // Therefore, holder_count remains 3 after Alice transfers her entire balance to Charlie.
+    let h = setup();
+    let alice = Address::generate(&h.env);
+    let bob = Address::generate(&h.env);
+    let charlie = Address::generate(&h.env);
+    h.approve_kyc(&alice);
+    h.approve_kyc(&bob);
+    h.approve_kyc(&charlie);
+
+    // Mint to two holders
+    h.token.issue(&inv_id(&h.env), &alice, &1_000);
+    h.token.issue(&inv_id(&h.env), &bob, &2_000);
+    assert_eq!(h.compliance.holder_count(), 2);
+
+    // Transfer full balance from alice to charlie (alice balance becomes 0)
+    h.token.transfer(&inv_id(&h.env), &alice, &charlie, &1_000);
+    assert_eq!(h.token.balance(&alice, &inv_id(&h.env)), 0);
+    assert_eq!(h.token.balance(&charlie, &inv_id(&h.env)), 1_000);
+
+    // Note: Due to lack of unregister_holder in invoice-token,
+    // compliance engine still accounts for alice as a registered holder.
+    // Holder count is 3 (alice, bob, charlie).
+    assert_eq!(h.compliance.holder_count(), 3);
+}
+
+#[test]
+fn test_redeem_full_balance_holder_count() {
+    // Current behaviour: redeem reduces balance to 0 without unregistering the holder.
+    // Therefore, holder_count does not decrement upon full redemption.
+    let h = setup();
+    let alice = Address::generate(&h.env);
+    let bob = Address::generate(&h.env);
+    h.approve_kyc(&alice);
+    h.approve_kyc(&bob);
+
+    h.token.issue(&inv_id(&h.env), &alice, &1_000);
+    h.token.issue(&inv_id(&h.env), &bob, &2_000);
+    assert_eq!(h.compliance.holder_count(), 2);
+
+    h.token.settle(&inv_id(&h.env));
+
+    // Alice redeems her full balance
+    h.token.redeem(&inv_id(&h.env), &alice, &1_000);
+    assert_eq!(h.token.balance(&alice, &inv_id(&h.env)), 0);
+
+    // Note: Holder count remains 2 because invoice-token doesn't call unregister_holder on redeem.
+    assert_eq!(h.compliance.holder_count(), 2);
+}
+
+#[test]
+fn test_burn_full_balance_holder_count() {
+    // Current behaviour: burn reduces balance to 0 without unregistering the holder.
+    // Therefore, holder_count does not decrement upon full burn.
+    let h = setup();
+    let alice = Address::generate(&h.env);
+    let bob = Address::generate(&h.env);
+    h.approve_kyc(&alice);
+    h.approve_kyc(&bob);
+
+    h.token.issue(&inv_id(&h.env), &alice, &1_000);
+    h.token.issue(&inv_id(&h.env), &bob, &2_000);
+    assert_eq!(h.compliance.holder_count(), 2);
+
+    // Alice burns her full balance
+    h.token.burn(&inv_id(&h.env), &alice, &1_000);
+    assert_eq!(h.token.balance(&alice, &inv_id(&h.env)), 0);
+
+    // Note: Holder count remains 2 because invoice-token doesn't call unregister_holder on burn.
+    assert_eq!(h.compliance.holder_count(), 2);
+}
+
+#[test]
 fn test_transfer_before_due_date() {
     let h = setup();
     let alice = Address::generate(&h.env);
