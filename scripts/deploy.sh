@@ -1,11 +1,11 @@
-#!/usr/bin/env bash
-# TrustMint deployment script — Stellar Testnet
+﻿#!/usr/bin/env bash
+# TrustMint deployment script 鈥?Stellar Testnet
 # Usage: bash scripts/deploy.sh [identity-name]
 # Requires: stellar CLI, cargo, wasm32 target
 #
 # SECURITY: All asset tokens use Soroban constructors (__constructor) so that
 # admin, kyc_registry, and compliance_engine are set atomically at deploy time.
-# There is no window between deploy and initialization — front-running is not
+# There is no window between deploy and initialization 鈥?front-running is not
 # possible. Do NOT revert to a two-step deploy-then-initialize pattern.
 
 set -euo pipefail
@@ -16,9 +16,9 @@ SOURCE="--source-account $IDENTITY --network $NETWORK"
 ADMIN_ADDR="$(stellar keys address $IDENTITY)"
 
 echo "==> Building all contracts..."
-cargo build --release --target wasm32-unknown-unknown
+cargo build --release --target wasm32v1-none
 
-WASM_DIR="target/wasm32-unknown-unknown/release"
+WASM_DIR="target/wasm32v1-none/release"
 
 build_wasm() {
   local name="$1"
@@ -56,7 +56,7 @@ CE_ID=$(stellar contract deploy \
   --kyc-registry "$KYC_ID")
 echo "    COMPLIANCE_ENGINE_ID=$CE_ID"
 
-# Asset tokens pass all constructor args atomically — no separate initialize call needed or possible.
+# Asset tokens pass all constructor args atomically 鈥?no separate initialize call needed or possible.
 # The '--' separator passes arguments directly to the contract constructor (__constructor).
 
 echo "==> Deploying Invoice Token..."
