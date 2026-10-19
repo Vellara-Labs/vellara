@@ -4,8 +4,12 @@
     "frontend",
     "sdk"
   ],
+  "dependencies": {
+    "dotenv": "^8.2.0",
+    "node-fetch": "^3.3.2"
+  },
   "scripts": {
-    "build:sdk": "npm --workspace sdk run build",
+    "build:sdk": "node init && npm --workspace sdk run build",
     "test:sdk": "npm --workspace sdk test"
   }
 }
