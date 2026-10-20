@@ -37,6 +37,28 @@ npm run build
 
 The dashboard needs contract IDs in `frontend/.env` for network-backed workflows. Copy [`frontend/.env.example`](frontend/.env.example) as a starting point. Never commit `.env` files, private keys, credentials, customer data, or personal identity documents.
 
+## Dependency security audits
+
+CI runs a read-only dependency audit matrix alongside Rustfmt. Each lockfile is
+checked independently, so one failing audit does not hide the other results.
+Run the same checks locally from the repository root:
+
+```bash
+cargo install cargo-audit --version 0.22.2 --locked
+cargo audit --deny warnings
+npm audit --audit-level=high --include-workspace-root
+(cd frontend && npm audit --audit-level=high --workspaces=false)
+(cd tests/integration && npm audit --audit-level=high --workspaces=false)
+```
+
+The root npm audit includes the workspace root and its frontend/SDK workspaces.
+The two directory-specific audits disable workspace discovery to inspect their
+own committed lockfiles. Installing npm dependencies is not required for these
+lockfile audits. Cargo advisories/warnings and npm high/critical advisories fail
+the job; registry/database failures also remain failures. These commands do not
+apply fixes or rewrite lockfiles. Review and remediate findings in a separate,
+tested dependency update rather than suppressing the audit.
+
 ## Make a focused change
 
 1. Create a branch with a short descriptive name, such as `fix/expiry-check` or `docs/testnet-setup`.
