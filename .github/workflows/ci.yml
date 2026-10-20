@@ -10,6 +10,54 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
+  audit:
+    name: Dependency audit – ${{ matrix.name }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    continue-on-error: false
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Cargo
+            ecosystem: cargo
+            directory: .
+            npm-options: ""
+          - name: npm workspace
+            ecosystem: npm
+            directory: .
+            npm-options: --include-workspace-root
+          - name: npm frontend
+            ecosystem: npm
+            directory: frontend
+            npm-options: --workspaces=false
+          - name: npm integration
+            ecosystem: npm
+            directory: tests/integration
+            npm-options: --workspaces=false
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install Rust toolchain
+        if: matrix.ecosystem == 'cargo'
+        uses: dtolnay/rust-toolchain@stable
+      - name: Install cargo-audit
+        if: matrix.ecosystem == 'cargo'
+        run: cargo install cargo-audit --version 0.22.2 --locked
+      - name: Audit Cargo lockfile
+        if: matrix.ecosystem == 'cargo'
+        run: cargo audit --deny warnings
+      - name: Set up Node.js
+        if: matrix.ecosystem == 'npm'
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      - name: Audit npm lockfile
+        if: matrix.ecosystem == 'npm'
+        working-directory: ${{ matrix.directory }}
+        run: npm audit --audit-level=high ${{ matrix.npm-options }}
+
   fmt:
     name: Rustfmt
     runs-on: ubuntu-latest
