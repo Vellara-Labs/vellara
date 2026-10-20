@@ -42,7 +42,7 @@ jobs:
           key: ${{ runner.os }}-cargo-clippy-${{ hashFiles('**/Cargo.lock') }}
           restore-keys: ${{ runner.os }}-cargo-clippy-
       - name: Clippy (all workspace crates, host target)
-        run: cargo clippy --all --all-targets -- -D warnings
+        run: cargo lint
 
   test:
     name: Tests – ${{ matrix.crate }}
